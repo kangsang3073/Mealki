@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itwillbs.mappers.storeMapper">
+
+	<select id="getItemListMapStore" resultType="map">
+		select *
+		from products inner
+		join stock
+		on products.item_num = stock.item_num
+		where supplier is not null and products.item_type like '%식자재'
+	</select>
+
+	<select id="getPlaceOrderListStore" resultType="map">
+		SELECT store.sto_num, CASE WHEN SUM(placeorder.order_qty) = SUM(store.sto_qty) THEN '입고완료'
+		       					   ELSE COALESCE(store.sto_progress, '미입고')
+		    					   END AS sto_progress,
+		    placeorder.order_num,placeorder.order_qty,products.item_name,store.sto_empNum,
+		    stock.stk_qnt,placeorder.emp_num,store.sto_shelf,store.sto_shelfDetail, placeorder.item_num,
+		    DATE_FORMAT(store.sto_date,'%Y-%m-%d') AS sto_date
+		FROM
+		    placeorder LEFT JOIN (SELECT sto_num,order_num,item_name,sto_date,sto_progress,
+		            					 sto_qty,sto_shelf, sto_shelfDetail,sto_empNum
+		       					  FROM store
+		       					  WHERE sto_progress = '입고완료') AS store ON placeorder.order_num = store.order_num AND placeorder.item_name = store.item_name
+		    LEFT JOIN products ON placeorder.item_num = products.item_num
+		    LEFT JOIN stock ON products.item_num = stock.item_num
+		WHERE 1=1
+		<if test="sto_num != null and !sto_num.equals('')">
+		    AND sto_num LIKE CONCAT('%', #{sto_num}, '%')
+		</if>
+		<if test="emp_num != null and !emp_num.equals('') and emp_num != 0">
+		    AND emp_num LIKE CONCAT('%', #{emp_num}, '%')
+		</if>
+		<if test="item_name != null and !item_name.equals('')">
+		    AND products.item_name LIKE CONCAT('%', #{item_name}, '%')
+		</if>
+		<if test="startDate != null and !startDate.equals('')">
+		    and sto_date <![CDATA[>=]]> #{startDate}
+		</if>
+		<if test="endDate != null and !endDate.equals('')">
+		    and sto_date <![CDATA[<=]]> #{endDate} + INTERVAL 1 DAY - INTERVAL 1 SECOND
+		</if>
+		GROUP BY
+		    placeorder.order_num,
+		    placeorder.item_name
+		ORDER BY
+		    sto_progress,
+		    sto_num DESC,
+		    placeorder.order_num DESC
+		LIMIT #{startRow}, #{pageSize}
+	</select>
+	
+	<select id="getStoreSearchListCount" resultType="java.lang.Integer">
+		select count(*)
+		from (SELECT store.sto_num, CASE WHEN SUM(placeorder.order_qty) = SUM(store.sto_qty) THEN '입고완료'
+		       					   ELSE COALESCE(store.sto_progress, '미입고')
+		    					   END AS sto_progress,
+		    placeorder.order_num,placeorder.order_qty,products.item_name,store.sto_empNum,
+		    stock.stk_qnt,placeorder.emp_num,store.sto_shelf,store.sto_shelfDetail,
+		    DATE_FORMAT(store.sto_date,'%Y-%m-%d') AS sto_date
+		FROM
+		    placeorder LEFT JOIN (SELECT sto_num,order_num,item_name,sto_date,sto_progress,
+		            					 sto_qty,sto_shelf, sto_shelfDetail,sto_empNum
+		       					  FROM store
+		       					  WHERE sto_progress = '입고완료') AS store ON placeorder.order_num = store.order_num AND placeorder.item_name = store.item_name
+		    LEFT JOIN products ON placeorder.item_num = products.item_num
+		    LEFT JOIN stock ON products.item_num = stock.item_num
+		WHERE 1=1
+		<if test="sto_num != null and !sto_num.equals('')">
+		    AND sto_num LIKE CONCAT('%', #{sto_num}, '%')
+		</if>
+		<if test="emp_num != null and !emp_num.equals('') and emp_num != 0">
+		    AND emp_num LIKE CONCAT('%', #{emp_num}, '%')
+		</if>
+		<if test="item_name != null and !item_name.equals('')">
+		    AND products.item_name LIKE CONCAT('%', #{item_name}, '%')
+		</if>
+		<if test="startDate != null and !startDate.equals('')">
+		    and sto_date <![CDATA[>=]]> #{startDate}
+		</if>
+		<if test="endDate != null and !endDate.equals('')">
+		    and sto_date <![CDATA[<=]]> #{endDate} + INTERVAL 1 DAY - INTERVAL 1 SECOND
+		</if>
+		GROUP BY
+		    placeorder.order_num,
+		    placeorder.item_name)as subquery
+        
+	</select>
+	
+	
+		<select id="getPlaceOrderListStore2" resultType="map">
+		SELECT store.sto_num, CASE WHEN SUM(placeorder.order_qty) = SUM(store.sto_qty) THEN '입고완료'
+		       					   ELSE COALESCE(store.sto_progress, '미입고')
+		    					   END AS sto_progress,
+		    placeorder.order_num,placeorder.order_qty,products.item_name,store.sto_empNum,
+		    stock.stk_qnt,placeorder.emp_num,store.sto_shelf,store.sto_shelfDetail, placeorder.item_num,
+		    DATE_FORMAT(store.sto_date,'%Y-%m-%d') AS sto_date
+		FROM
+		    placeorder LEFT JOIN (SELECT sto_num,order_num,item_name,sto_date,sto_progress,
+		            					 sto_qty,sto_shelf, sto_shelfDetail,sto_empNum
+		       					  FROM store
+		       					  WHERE sto_progress = '입고완료') AS store ON placeorder.order_num = store.order_num AND placeorder.item_name = store.item_name
+		    LEFT JOIN products ON placeorder.item_num = products.item_num
+		    LEFT JOIN stock ON products.item_num = stock.item_num
+		GROUP BY
+		    placeorder.order_num,
+		    placeorder.item_name
+		ORDER BY
+		    sto_progress,
+		    sto_num DESC,
+		    placeorder.order_num DESC
+	</select>
+	
+	<insert id="insertStore">
+		 insert into store (sto_num,order_num,sto_date,sto_progress,sto_qty,
+			    sto_shelf,sto_shelfDetail,sto_empNum, item_name, item_num)
+				  values (
+				    concat('ST',DATE_FORMAT(NOW(), '%y%m%d%H%i%S')),
+				    #{order_num}, 
+				    #{sto_date}, 
+				    #{sto_progress}, 
+				    #{sto_qty}, 
+				    #{sto_shelf},
+				    #{sto_shelfDetail},
+				    #{sto_empNum},
+				    #{item_name},
+				    #{item_num}
+				  )
+	</insert>
+	
+	<update id="updateStock">
+	UPDATE stock
+	SET stock.stk_qnt = stock.stk_qnt + (SELECT sto_qty
+						 FROM store
+						 WHERE order_num = #{order_num} and item_name = #{item_name})
+	WHERE item_num = (SELECT item_num
+					  FROM placeorder
+					  WHERE order_num = #{order_num}  and item_name = #{item_name})
+	
+	</update>
+
+
+	<select id="getStoreDetailList" resultType="map">
+		  SELECT sto_num, placeorder.order_num, DATE_FORMAT(sto_date,'%Y-%m-%d') AS sto_date, 
+									CASE WHEN SUM(placeorder.order_qty) = SUM(store.sto_qty) THEN '입고완료'
+		       					   ELSE COALESCE(store.sto_progress, '미입고')
+		    					   END AS sto_progress,
+		      sto_qty, sto_shelf, sto_shelfDetail, sto_empNum, 
+		      DATE_FORMAT(placeorder.order_date,'%Y-%m-%d') AS order_date,
+		      DATE_FORMAT(placeorder.due_date,'%Y-%m-%d') AS due_date, 
+		      placeorder.emp_num, placeorder.order_qty, stock.stk_qnt, placeorder.item_name
+		  FROM 
+		      placeorder
+		      LEFT JOIN store ON placeorder.order_num = store.order_num AND placeorder.item_name = store.item_name
+		      LEFT JOIN products ON placeorder.item_num = products.item_num
+		      LEFT JOIN stock ON products.item_num = stock.item_num
+		  WHERE 
+		      placeorder.order_num = #{order_num} AND placeorder.item_name = #{item_name}
+		  GROUP BY 
+		      placeorder.order_num, placeorder.item_name
+	</select>
+
+<!-- 
+select s.sto_num, s.sto_progress, st.stk_qnt
+from store s join placeorder p
+on s.order_num = p.order_num
+join stock st
+on st.item_num = p.item_num
+order by s.sto_num desc; -->
+
+</mapper>

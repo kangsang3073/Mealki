@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itwillbs.mappers.employeeMapper">
+	<select id="userCheck" resultType="com.itwillbs.domain.EmployeeDTO">
+        select * from employee
+        where emp_num = #{emp_num} and emp_pass = #{emp_pass}
+    </select>
+    
+    <select id="getEmployeeListMap" resultType="map">
+    	select emp_num, emp_Kname, dept_position, dept_duty, department.dept_deptName, 
+		DATE_FORMAT(emp_joinDate, '%Y-%m-%d')as emp_joinDate, 
+	    concat(substring(concat('0',emp_tel) from 1 for 3),'-',substring(concat('0',emp_tel) from 4 for 3),'-',substring(concat('0',emp_tel) from 7 for 4)) as emp_tel, 
+	    emp_email
+		from employee join department
+		on dept_num = dept_deptNum
+		where 
+			<if test="search_option == 'emp_Kname'.toString()">
+				emp_Kname like CONCAT('%', #{keyword}, '%')
+			</if>
+			
+			<if test="search_option == 'emp_num'.toString()">
+				emp_num like CONCAT('%', #{keyword}, '%')
+			</if>
+			
+			<if test="search_option == 'emp_tel'.toString()">
+				emp_tel like CONCAT('%', #{keyword}, '%')
+			</if>
+			
+			<if test="search_option == 'emp_phone'.toString()">
+				emp_phone like CONCAT('%', #{keyword}, '%')
+			</if>
+			
+			<if test="search_option == 'dept_num'.toString()">
+				department.dept_deptName like CONCAT('%', #{keyword}, '%')
+			</if>
+			
+			<if test="search_check == null or search_check.equals('')">
+        		and (emp_status ='재직' or emp_status ='휴직')
+        	</if>
+    </select>
+    
+	<insert id="insertEmployee">
+	
+	    insert into employee (
+	        emp_num, dept_num, emp_Kname, emp_Ename,
+	        emp_birth, emp_gender, emp_tel, emp_phone,
+	        emp_email, emp_addr, emp_addr2, emp_status,
+	        emp_classification, emp_joinDate,
+	        dept_position, dept_duty, emp_img, emp_numbering)
+	    select CONCAT(#{emp_classification}, DATE_FORMAT(NOW(), '%y%m%d'), LPAD((IFNULL(MAX(emp_numbering),0))+1,2,'0')),
+	           #{dept_num}, #{emp_Kname}, #{emp_Ename}, #{emp_birth}, #{emp_gender}, #{emp_tel}, #{emp_phone}, 
+	           #{emp_email}, #{emp_addr}, #{emp_addr2}, #{emp_status}, #{emp_classification},
+	           DATE_FORMAT(NOW(), '%y%m%d'), #{dept_position}, #{dept_duty}, #{emp_img}, IFNULL(MAX(emp_numbering) + 1, 1)
+	    from employee
+	    where emp_joinDate = DATE_FORMAT(NOW(), '%y%m%d')
+	    LIMIT 1
+	
+	</insert>
+
+	<select id="getEmployeeDetail" resultType="map">
+	select employee.emp_num,
+			employee.dept_num,
+			employee.emp_Kname,
+			employee.emp_Ename,
+			employee.emp_birth,
+			employee.emp_gender,
+			employee.emp_tel,
+			employee.emp_phone,
+			employee.emp_email,
+			employee.emp_addr,
+			employee.emp_addr2,
+			employee.emp_status,
+			employee.emp_classification,
+			DATE_FORMAT(employee.emp_joinDate,'%Y-%m-%d')as emp_joinDate,
+			COALESCE(DATE_FORMAT(employee.emp_leaveDate,'%Y-%m-%d'), '')as emp_leaveDate,
+			COALESCE(DATE_FORMAT(employee.emp_absenceDate,'%Y-%m-%d'),'')as emp_absenceDate,
+			employee.dept_position,
+			employee.dept_duty,
+			employee.emp_img,
+			employee.emp_numbering,
+			department.dept_deptName,
+			department.dept_teamNum,
+			department.dept_teamName
+		from employee
+		join department on employee.dept_num = department.dept_deptNum
+		where employee.emp_num = #{emp_num}
+	</select>
+
+	<update id="updateEmployee">
+	    update employee
+	    set dept_num = #{dept_num}, emp_Kname = #{emp_Kname}, emp_Ename = #{emp_Ename},
+	        emp_tel = #{emp_tel}, emp_phone = #{emp_phone}, emp_email = #{emp_email},
+	        emp_addr = #{emp_addr}, emp_addr2 = #{emp_addr2}, emp_classification =#{emp_classification}, emp_img =#{emp_img},  
+	        dept_position = #{dept_position}, dept_duty =#{dept_duty}
+	    where emp_num = #{emp_num}
+	</update>
+	
+	<update id="absenceEmployee">
+		update employee
+		set emp_absenceDate = now(), emp_status ='휴직'
+	    where emp_num = #{emp_num}
+	</update>
+    
+    <update id="leaveEmployee">
+		update employee
+		set emp_leaveDate = now(), emp_status ='퇴사'
+	    where emp_num = #{emp_num}
+	</update>
+	
+	<update id="rehabilitationEmployee">
+		update employee
+		set emp_absenceDate = Null
+	    where emp_num = #{emp_num}
+	</update>
+	
+	 <select id="yellowPage" resultType="map">
+    	select emp_num, emp_Kname, dept_position, dept_duty, department.dept_deptName, 
+		DATE_FORMAT(emp_joinDate, '%Y-%m-%d')as emp_joinDate, 
+	    concat(substring(concat('0',emp_tel) from 1 for 3),'-',substring(concat('0',emp_tel) from 4 for 3),'-',substring(concat('0',emp_tel) from 7 for 4)) as emp_tel, 
+	    emp_email
+		from employee join department
+		on dept_num = dept_deptNum
+		where (emp_status = '재직' or emp_status = '휴직')
+			<if test="search_option == 'emp_Kname'.toString()">
+				and emp_Kname like CONCAT('%', #{keyword}, '%')
+			</if>
+			
+			<if test="search_option == 'emp_num'.toString()">
+				and emp_num like CONCAT('%', #{keyword}, '%')
+			</if>
+			
+			<if test="search_option == 'emp_tel'.toString()">
+				and emp_tel like CONCAT('%', #{keyword}, '%')
+			</if>
+			
+			<if test="search_option == 'emp_phone'.toString()">
+				and emp_phone like CONCAT('%', #{keyword}, '%')
+			</if>
+			
+			<if test="search_option == 'dept_num'.toString()">
+				and department.dept_deptName like CONCAT('%', #{keyword}, '%')
+			</if>
+		order by department.dept_deptName, dept_position, dept_duty, emp_joinDate desc
+		limit #{startRow}, #{pageSize}  
+    </select>
+    
+    	 <select id="yellowPageCount" resultType="java.lang.Integer">
+    	select count(*)
+    	from (select emp_num, emp_Kname, dept_position, dept_duty, department.dept_deptName,DATE_FORMAT(emp_joinDate, '%Y-%m-%d')as emp_joinDate, 
+	    	 concat(substring(concat('0',emp_tel) from 1 for 3),'-',substring(concat('0',emp_tel) from 4 for 3),'-',substring(concat('0',emp_tel) from 7 for 4)) as emp_tel, emp_email
+			 from employee join department
+			 on dept_num = dept_deptNum
+			 where (emp_status = '재직' or emp_status = '휴직')
+			 
+			<if test="search_option == 'emp_Kname'.toString()">
+				and emp_Kname like CONCAT('%', #{keyword}, '%')
+			</if>
+			
+			<if test="search_option == 'emp_num'.toString()">
+				and emp_num like CONCAT('%', #{keyword}, '%')
+			</if>
+			
+			<if test="search_option == 'emp_tel'.toString()">
+				and emp_tel like CONCAT('%', #{keyword}, '%')
+			</if>
+			
+			<if test="search_option == 'emp_phone'.toString()">
+				and emp_phone like CONCAT('%', #{keyword}, '%')
+			</if>
+			
+			<if test="search_option == 'dept_num'.toString()">
+				and department.dept_deptName like CONCAT('%', #{keyword}, '%')
+			</if>
+			 
+			 )as subquery
+    </select>
+</mapper>

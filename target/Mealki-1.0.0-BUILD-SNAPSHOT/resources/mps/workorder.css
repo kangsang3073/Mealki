@@ -1,0 +1,198 @@
+@charset "UTF-8";
+
+/* 모달창 스타일 */
+.modal {
+  display: none; /* 모달창은 기본적으로 안 보이도록 설정 */
+  position: fixed; /* 화면을 기준으로 고정된 위치에 배치 */
+  z-index: 1; /* 모달창은 가장 위에 배치 */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.2); /* 배경은 반투명한 검은색 */
+}
+
+/* 모달창 내용 */
+.modal-content {
+  background-color: #fefefe;
+  margin: 10% auto; /* 모달창이 화면 중앙에 위치하도록 설정 */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 900px; /* 모달창 가로 길이 */
+  max-height: 90%; /* 모달창 세로 길이 */
+  overflow-y: auto; /* 세로 스크롤 생성 */
+  position: relative; /* 모달창 내용을 상대적으로 배치하기 위한 설정 */
+}
+
+
+
+
+.top_table {
+	width: 100%;
+	height: 400px;
+}
+.contract_list{
+	padding-left: 10px !important;
+	padding-right: 10px !important;
+}
+
+#table_search {
+	background-color: #e6e6f4;
+	border-radius: 10px;
+	padding-top: 21px;
+	padding-bottom: 22px;
+	padding-left: 10px;
+	padding-right: 10px;
+	width: 100%;
+	height: 100px;
+	margin:0 auto 20px auto; 
+	text-align: center;
+}
+
+#contract_search {
+	background-color: #e6e6f4;
+	border-radius: 10px;
+	padding-top: 15px;
+	width: 90%;
+	height: 60px;
+	margin:20px auto 20px auto; 
+	text-align: center;
+}
+
+#table_search2 {
+	background-color: #e6e6f4;
+	border-radius: 10px;
+	padding-top: 24px;
+	padding-bottom: 22px;
+	padding-left: 10px;
+	padding-right: 10px;
+	margin-top: 21px;
+	margin-bottom: 20px;
+	margin-left: 15px;
+	width: 97%;
+	height: 75px;
+}
+
+#orderlist_table tr {
+	height: 32px;
+}
+
+#orderlist_table th {
+	background-color: #4B49AC;
+	color: #fff;
+}
+
+#dynamicTable tr {
+	height: 32px;
+}
+
+#dynamicTable th {
+	background-color: #4B49AC;
+	color: #fff;
+}
+
+#orderlist_table tbody tr:hover td{ 
+	background-color: lightgray !important;
+	cursor: pointer !important;
+}
+
+table {
+	margin:0 auto;
+	width: 100%;
+	text-align: center;
+	border-color: #6C7383;
+}
+
+input {
+	width: 150px;
+	border: 0px;
+	text-align: center !important;
+}
+
+td tr th {
+	font-size: 12px;
+}
+
+h4 {
+	float: left;
+	width: 100%;
+	font-weight: 600;
+	margin-bottom: 20px;
+}
+
+.input-search #order_num_search2 #order_date_search2 #due_date_search2 #pd_num_search2
+	{
+	border: 1px solid grey;
+}
+
+.contentbody {
+	width: 100%;
+	height: 2000px;
+	padding: 20px 20px;
+}
+
+ul, li {
+	list-style: none;
+}
+
+/*tab css*/
+.tab {
+	float: left;
+	width: 100%;
+	height: 290px;
+	margin: 10px auto;
+}
+
+.tabnav {
+	font-size: 0;
+	width: 600px;
+	margin-bottom: 0px;
+}
+
+.tabnav li {
+	display: inline-block;
+	height: 46px;
+	text-align: center;
+	border-right: 1px solid #ddd;
+}
+
+.tabnav li a:before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 0px;
+	width: 100%;
+	height: 3px;
+}
+
+.tabnav li a.active:before {
+	background: #4B49AC;
+}
+
+.tabnav li a.active {
+	border-bottom: 1px solid #fff;
+}
+
+.tabnav li a {
+	position: relative;
+	display: block;
+	background: #f8f8f8;
+	color: #000;
+	padding: 0 30px;
+	line-height: 46px;
+	text-decoration: none;
+	font-size: 16px;
+}
+
+.tabnav li a:hover, .tabnav li a.active {
+	background: #fff;
+	color: #4B49AC;
+}
+
+.tabcontent {
+	padding: 20px;
+	height: 595px;
+	border-top: none;
+	background-color: #fff;
+	margin-right: 50px;
+}

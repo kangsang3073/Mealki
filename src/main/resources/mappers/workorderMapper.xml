@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itwillbs.mappers.workorderMapper">
+
+	<select id="getWorkorderCount" resultType="java.lang.Integer">
+		select count(*) 
+		from workorder w join contract c
+		where w.business_num = c.business_num
+		<if test="wo_num != null">
+			and RIGHT(wo_num,12) = #{wo_num}
+		</if>
+		<if test="business_num != null">
+			and w.business_num = #{business_num}
+		</if>
+		<if test="order_date != null">
+			and date_format(wo_date, '%Y-%m-%d') <![CDATA[>=]]>
+			#{order_date}
+		</if>
+		<if test="dorder_date != null">
+			and date_format(wo_date, '%Y-%m-%d') <![CDATA[<=]]>
+			#{dorder_date}
+		</if>
+		<if test="out_date != null">
+			and date_format(c.out_date, '%Y-%m-%d') <![CDATA[>=]]>
+			#{out_date}
+		</if>
+		<if test="dout_date != null">
+			and date_format(c.out_date, '%Y-%m-%d') <![CDATA[<=]]>
+			#{out_date}
+		</if>
+		and wo_available=1
+	</select>
+	
+	<select id="getWorkorderCount2" resultType="java.lang.Integer">
+		select count(*) 
+		from workorder w join contract c
+		on w.business_num = c.business_num
+		left outer join qc_status q on q.wo_num=w.wo_num
+		where q.qc_qty is null
+		<if test="wo_num != null">
+			and RIGHT(w.wo_num,12) = #{wo_num}
+		</if>
+		<if test="business_num != null">
+			and w.business_num = #{business_num}
+		</if>
+		<if test="order_date != null">
+			and date_format(wo_date, '%Y-%m-%d') <![CDATA[>=]]>
+			#{order_date}
+		</if>
+		<if test="dorder_date != null">
+			and date_format(wo_date, '%Y-%m-%d') <![CDATA[<=]]>
+			#{dorder_date}
+		</if>
+		<if test="out_date != null">
+			and date_format(out_date, '%Y-%m-%d') <![CDATA[>=]]>
+			#{out_date}
+		</if>
+		<if test="dout_date != null">
+			and date_format(out_date, '%Y-%m-%d') <![CDATA[<=]]>
+			#{out_date}
+		</if>
+		and wo_available=1
+	</select>
+	
+
+	<select id="getWorkorderList" resultType="com.itwillbs.domain.WorkorderDTO">
+		select w.wo_num, w.business_num, w.wo_date, date_format(c.out_date,
+		'%Y-%m-%d') as out_date, w.wo_qty, w.manu_name, w.item_name, 
+		e.emp_Kname as wo_empname, sum(q.qc_qty) as pr_sum,
+				(case
+				when sum(q.qc_qty) <![CDATA[<]]> w.wo_qty
+				then "진행중"
+				when sum(q.qc_qty) = w.wo_qty 
+				then "완료"
+				else "대기"
+				end) as wo_state
+		from employee e join workorder w
+		on w.wo_emp=e.emp_num
+		join contract c
+		on w.business_num=c.business_num
+		left outer join qc_status q
+		on q.wo_num=w.wo_num
+		where wo_available=1
+		<if test="wo_num != null">
+			and RIGHT(w.wo_num,12) = #{wo_num}
+		</if>
+		<if test="business_num != null">
+			and w.business_num = #{business_num}
+		</if>
+		<if test="order_date != null">
+			and date_format(w.wo_date, '%Y-%m-%d') <![CDATA[>=]]>
+			#{order_date}
+		</if>
+		<if test="dorder_date != null">
+			and date_format(w.wo_date, '%Y-%m-%d') <![CDATA[<=]]>
+			#{dorder_date}
+		</if>
+		<if test="out_date != null">
+			and date_format(c.out_date, '%Y-%m-%d') <![CDATA[>=]]>
+			#{out_date}
+		</if>
+		<if test="dout_date != null">
+			and date_format(c.out_date, '%Y-%m-%d') <![CDATA[<=]]>
+			#{out_date}
+		</if>
+		group by wo_num, business_num, wo_date, out_date, wo_qty, manu_name, item_name, wo_empname
+		order by wo_date desc
+		limit #{startRow}, #{pageSize}
+	</select>
+
+	<select id="getWorkorderList2" resultType="com.itwillbs.domain.WorkorderDTO">
+		select w.wo_num, w.business_num, w.wo_date, date_format(c.out_date,
+		'%Y-%m-%d') as out_date, w.wo_qty, w.manu_name, w.item_name, 
+		e.emp_Kname as wo_empname, sum(q.qc_qty) as pr_sum,
+				(case
+				when sum(q.qc_qty) <![CDATA[<]]> w.wo_qty
+				then "진행중"
+				when sum(q.qc_qty) = w.wo_qty 
+				then "완료"
+				else "대기"
+				end) as wo_state
+		from employee e join workorder w
+		on w.wo_emp=e.emp_num
+		join contract c
+		on w.business_num=c.business_num
+		left outer join qc_status q
+		on q.wo_num=w.wo_num
+		where wo_available=1
+		and q.qc_qty is null
+		<if test="wo_num != null">
+			and RIGHT(w.wo_num,12) = #{wo_num}
+		</if>
+		<if test="business_num != null">
+			and w.business_num = #{business_num}
+		</if>
+		<if test="order_date != null">
+			and date_format(w.wo_date, '%Y-%m-%d') <![CDATA[>=]]>
+			#{order_date}
+		</if>
+		<if test="dorder_date != null">
+			and date_format(w.wo_date, '%Y-%m-%d') <![CDATA[<=]]>
+			#{dorder_date}
+		</if>
+		<if test="out_date != null">
+			and date_format(c.out_date, '%Y-%m-%d') <![CDATA[>=]]>
+			#{out_date}
+		</if>
+		<if test="dout_date != null">
+			and date_format(c.out_date, '%Y-%m-%d') <![CDATA[<=]]>
+			#{out_date}
+		</if>
+		group by wo_num, business_num, wo_date, out_date, wo_qty, manu_name, item_name, wo_empname
+		order by wo_date desc
+		limit #{startRow}, #{pageSize}
+	</select>
+	
+	<select id="getContractCount" resultType="java.lang.Integer">
+		select count(*) 
+		FROM contract 
+		WHERE business_num NOT IN (SELECT
+								   DISTINCT business_num
+								   FROM workorder)
+	</select>
+
+	<select id="getcontractList" resultType="com.itwillbs.domain.WorkorderDTO">
+		SELECT business_num, item_name, contract_qty, cust_name,
+		date_format(business_date,'%Y-%m-%d') as business_date,
+		date_format(out_date,'%Y-%m-%d') as out_date
+		FROM contract 
+		WHERE business_num NOT IN (SELECT
+		DISTINCT business_num
+		FROM workorder)
+		order by business_num
+		limit #{startRow}, #{pageSize}
+	</select>
+
+	<select id="ContractSearch" resultType="com.itwillbs.domain.WorkorderDTO">
+		select business_num, item_name, contract_qty, cust_name,
+		date_format(business_date,'%Y-%m-%d') as business_date,
+		date_format(out_date,'%Y-%m-%d') as out_date
+		from contract
+		where business_num = #{keyword}
+	</select>
+
+	<select id="WoInsert" resultType="com.itwillbs.domain.WorkorderDTO">
+		select c.business_num, r.item_num as ritem_num, c.item_num,
+		r.item_name as r_name, c.contract_qty, r.r_name as item_name,
+		round(c.contract_qty*r.r_qty/p.weight) as wo_qty
+		from recipe r, contract c, products p
+		where r.r_name=c.item_name
+		and r.item_name=p.item_name
+		and business_num=#{num}
+	</select>
+
+	<select id="WoUpdateForm" resultType="com.itwillbs.domain.WorkorderDTO">
+		select w.wo_num, c.business_num, date_format(w.wo_date,
+		'%Y년 %m월 %d일') as wo_date, r.item_num as ritem_num,
+		c.item_num, r.item_name as r_name, c.contract_qty, r.r_name as item_name, 
+		round(c.contract_qty*r.r_qty/p.weight) as wo_qty, w.manu_name,
+				(case
+				when sum(q.qc_qty) <![CDATA[<]]> w.wo_qty then "진행중"
+				when sum(q.qc_qty) = w.wo_qty then "완료"
+				end) as wo_state
+		from recipe r join contract c on r.r_name = c.item_name
+		join products p on r.item_name = p.item_name
+		join workorder w on c.business_num=w.business_num
+		left outer join qc_status q
+		on q.wo_num=w.wo_num
+		where r.r_name=w.item_name
+		and w.wo_num=#{num}
+		group by w.wo_num, c.business_num, r.item_num, c.item_num, r.item_name, c.contract_qty
+	</select>
+
+	<insert id="insertWorkorder">
+		insert into workorder(wo_num, business_num, wo_date,
+		wo_qty, manu_name, item_name, wo_emp, wo_available)
+		values(concat("WO",date_format(now(), "%y%m%d%H%i%s")), #{business_num},
+		now(), #{contract_qty}, #{manu_name}, #{item_name}, #{wo_emp}, 1)
+
+	</insert>
+
+	<insert id="insertWorkorder_item">
+		insert into workorder_item
+		select w.wo_num, r.item_name as item_name, 
+		round(r.r_qty/p.weight*c.contract_qty) as wo_qty
+		from recipe r, contract c, products p, workorder w
+		where r.r_name= c.item_name
+		and w.business_num = c.business_num
+		and r.item_name = p.item_name
+		and w.business_num=#{business_num}
+	</insert>
+
+	<update id="deleteWorkorder">
+		update workorder set wo_available=0
+		where wo_num = #{wo_num}
+	</update>
+
+	<update id="updateWorkorder">
+		update workorder set manu_name= #{manu_name}
+		where wo_num= #{wo_num}
+	</update>
+
+</mapper>

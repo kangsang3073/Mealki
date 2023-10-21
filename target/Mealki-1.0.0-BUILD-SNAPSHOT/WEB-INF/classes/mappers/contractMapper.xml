@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.itwillbs.mappers.contractMapper">
+
+<!-- 	id="이름" sql구문 하나 하나 이름 
+        ? 대신에 BoardDTO 멤버변수명 #{id} -->
+	 <insert id="contractInsertBoard">
+    	INSERT INTO contract(business_num,
+    						cust_num,
+    						cust_name,
+    						item_num,
+    						item_name,
+
+    						business_date,
+    						out_date,
+    						incharge_name,
+    						contract_qty) 
+    	VALUES(#{business_num},
+    			#{cust_num},
+    			#{cust_name},
+    			#{item_num},
+    			#{item_name},
+
+    			#{business_date},
+    			#{out_date},
+    			#{incharge_name},
+    			#{contract_qty})
+    </insert>
+	
+	<select id="getBoardList" resultType="com.itwillbs.domain.ContractDTO">
+        SELECT item_name, cust_name, date_format(business_date,'%Y-%m-%d') as business_date,
+        date_format(out_date,'%Y-%m-%d') as out_date,incharge_name,contract_qty, business_num
+        from contract
+       
+        <if test="search_option == 'item_name'.toString()">
+        where item_name  like CONCAT('%',#{search},'%')
+        </if>
+        <if test="search_option == 'cust_name'.toString()">
+        where cust_name  like CONCAT('%',#{search},'%')
+        </if>
+        order by business_num desc
+		limit #{startRow}, #{pageSize}
+    </select>
+    
+<!-- 검색어 -->
+	 <select id="getContractCount" resultType="java.lang.Integer">
+        select count(*) from (SELECT item_name, cust_name, date_format(business_date,'%Y-%m-%d') as business_date,
+        date_format(out_date,'%Y-%m-%d') as out_date,incharge_name,contract_qty, business_num
+        from contract
+       
+        <if test="search_option == 'item_name'.toString()">
+        where item_name  like CONCAT('%',#{search},'%')
+        </if>
+        <if test="search_option == 'cust_name'.toString()">
+        where cust_name  like CONCAT('%',#{search},'%')
+        </if>
+        order by business_num desc) as subquery
+    </select>
+
+	 <select id="selectContractTotal" resultType="java.lang.Integer">
+    	SELECT COUNT(*) total FROM contract
+    </select>
+
+
+	<select id="getContractListMap" resultType="map">
+		SELECT customer.cust_num, customer.cust_name
+		from customer 
+		where cust_gubun1 like '%납품처%'
+			
+	</select>
+	
+	<select id="getProductList" resultType="com.itwillbs.domain.PlaceOrderDTO">
+	select * from products
+	where item_num like '%p%'
+	</select>
+	
+	<select id="getNameList" resultType="com.itwillbs.domain.ContractDTO">
+	select distinct cust_name from customer
+	where cust_gubun1 = '납품처'
+	</select>
+	
+	<select id="getNameList2" resultType="com.itwillbs.domain.EmployeeDTO">
+	select * from employee
+	where dept_num = 200
+	</select>
+	
+	<select id="getBoard" resultType="com.itwillbs.domain.ContractDTO">
+		select business_num, cust_num, item_num,item_name,cust_name,business_date,
+		out_date,incharge_name,contract_qty,
+		
+		(CASE WHEN EXISTS (
+        SELECT 1 FROM workorder WHERE business_num = #{business_num}
+		    ) THEN 1 ELSE 0 END )AS exists_in_workorder
+		FROM contract
+		WHERE business_num = #{business_num};
+		
+	</select>
+
+	<update id="updateBoard">
+		update contract 
+		set contract_qty=#{contract_qty}
+		where business_num = #{business_num}
+	</update>
+	
+	<delete id="deleteBoard">
+		delete from contract
+		where business_num = #{business_num}
+	
+	</delete>
+
+
+
+
+
+
+
+
+
+
+
+</mapper>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.itwillbs.mappers.unstoreMapper">
+	
+	<select id="getUnstoreList" resultType="map">
+		select unsto_num,workorder.wo_num, DATE_FORMAT(workorder.wo_date,'%Y-%m-%d') as wo_date, workorder.wo_qty, contract.cust_name, 
+				contract.item_name, DATE_FORMAT(contract.out_date,'%Y-%m-%d') as out_date, COALESCE(unsto_progress,'미출고') as unsto_progress,
+				contract.item_num, DATE_FORMAT(unsto_date,'%Y-%m-%d') as unsto_date, emp_num,
+				CASE 
+           		WHEN EXISTS (SELECT 1
+               				 FROM workorder_item
+               				 LEFT JOIN stock ON workorder_item.item_name = stock.item_name
+              				 WHERE workorder_item.wo_num = workorder.wo_num
+             			     AND stock.stk_qnt - workorder_item.wo_qty <![CDATA[<]]> 0 ) THEN '출고불가능'
+          		 WHEN COALESCE(unsto_progress, '미출고') = '출고완료' THEN '출고완료'
+          		 ELSE '출고가능'
+       			END as unstore_status
+		from unstore
+		right outer join workorder
+		on unstore.wo_num=workorder.wo_num
+		right outer join contract
+		on workorder.business_num = contract.business_num
+		where workorder.wo_available=1
+		
+		<if test="unsto_num != null and !unsto_num.equals('')">
+        	and unsto_num like concat ('%',#{unsto_num}, '%')
+        </if>
+        
+        <if test="emp_num != null and !emp_num.equals('') and emp_num != 0">
+        	and emp_num like concat ('%',#{emp_num}, '%')
+        </if>
+        
+        <if test="item_name != null and !item_name.equals('')">
+        	and products.item_name like concat ('%',#{item_name}, '%')
+        </if>
+		<if test="startDate != null and !startDate.equals('')">
+		    and unsto_date <![CDATA[>=]]> #{startDate}
+		</if>
+		
+		<if test="endDate != null and !endDate.equals('')">
+		    and unsto_date <![CDATA[<=]]> #{endDate} + INTERVAL 1 DAY - INTERVAL 1 SECOND
+		</if>
+        order by unsto_progress, unsto_num desc, workorder.wo_num desc
+        limit #{startRow}, #{pageSize}       
+        
+	</select>
+	
+	<select id="getUnstoreListCount" resultType="java.lang.Integer">
+    select count(*) from (select unsto_num,workorder.wo_num, DATE_FORMAT(workorder.wo_date,'%Y-%m-%d') as wo_date, workorder.wo_qty, contract.cust_name, 
+				contract.item_name, DATE_FORMAT(contract.out_date,'%Y-%m-%d') as out_date, COALESCE(unsto_progress,'미출고') as unsto_progress,
+				contract.item_num, DATE_FORMAT(unsto_date,'%Y-%m-%d') as unsto_date, emp_num,
+				CASE 
+           		WHEN EXISTS (SELECT 1
+               				 FROM workorder_item
+               				 LEFT JOIN stock ON workorder_item.item_name = stock.item_name
+              				 WHERE workorder_item.wo_num = workorder.wo_num
+             			     AND stock.stk_qnt - workorder_item.wo_qty <![CDATA[<]]> 0 ) THEN '출고불가능'
+          		 WHEN COALESCE(unsto_progress, '미출고') = '출고완료' THEN '출고완료'
+          		 ELSE '출고가능'
+       			END as unstore_status
+		from unstore
+		right outer join workorder
+		on unstore.wo_num=workorder.wo_num
+		right outer join contract
+		on workorder.business_num = contract.business_num
+		where workorder.wo_available=1
+		
+		<if test="unsto_num != null and !unsto_num.equals('')">
+        	and unsto_num like concat ('%',#{unsto_num}, '%')
+        </if>
+        
+        <if test="emp_num != null and !emp_num.equals('') and emp_num != 0">
+        	and emp_num like concat ('%',#{emp_num}, '%')
+        </if>
+        
+        <if test="item_name != null and !item_name.equals('')">
+        	and products.item_name like concat ('%',#{item_name}, '%')
+        </if>
+		<if test="startDate != null and !startDate.equals('')">
+		    and unsto_date <![CDATA[>=]]> #{startDate}
+		</if>
+		
+		<if test="endDate != null and !endDate.equals('')">
+		    and unsto_date <![CDATA[<=]]> #{endDate} + INTERVAL 1 DAY - INTERVAL 1 SECOND
+		</if>
+        order by unsto_progress, unsto_num desc, workorder.wo_num desc) as subquery
+
+		</select>
+	
+
+	<select id="getUnstoreList2" resultType="map">
+		select unsto_num,workorder.wo_num, DATE_FORMAT(workorder.wo_date,'%Y-%m-%d') as wo_date, workorder.wo_qty, contract.cust_name, 
+				contract.item_name, DATE_FORMAT(contract.out_date,'%Y-%m-%d') as out_date, COALESCE(unsto_progress,'미출고') as unsto_progress,
+				contract.item_num, DATE_FORMAT(unsto_date,'%Y-%m-%d') as unsto_date, emp_num,
+				CASE 
+           		WHEN EXISTS (SELECT 1
+               				 FROM workorder_item
+               				 LEFT JOIN stock ON workorder_item.item_name = stock.item_name
+              				 WHERE workorder_item.wo_num = workorder.wo_num
+             			     AND stock.stk_qnt - workorder_item.wo_qty <![CDATA[<]]> 0 ) THEN '출고불가능'
+          		 WHEN COALESCE(unsto_progress, '미출고') = '출고완료' THEN '출고완료'
+          		 ELSE '출고가능'
+       			END as unstore_status
+		from unstore
+		right outer join workorder
+		on unstore.wo_num=workorder.wo_num
+		right outer join contract
+		on workorder.business_num = contract.business_num
+		where workorder.wo_available=1
+        order by unsto_progress, unsto_num desc, workorder.wo_num desc
+	</select>
+
+
+
+	
+	<insert id="insertUnstore">
+		insert into unstore (unsto_num, wo_num, item_name, unsto_date,
+							unsto_progress, unsto_qty, emp_num, item_num)
+			   values (
+			    concat('UST',DATE_FORMAT(NOW(),'%y%m%d%H%i%S')),
+			    #{wo_num},
+			    #{item_name},
+			    #{unsto_date},
+			    #{unsto_progress},
+			    #{unsto_qty},
+			    #{emp_num},
+			    #{item_num}
+			   )
+	
+	</insert>
+	
+	<update id="updateStock_unstore">
+		UPDATE stock
+		left JOIN workorder_item on workorder_item.item_name = stock.item_name
+		SET stock.stk_qnt = stock.stk_qnt - workorder_item.wo_qty
+		WHERE workorder_item.wo_num = #{wo_num};
+	</update>
+	
+	
+	<select id="getUnstoreDetailList" resultType="map">
+		select unsto_num,workorder.wo_num, DATE_FORMAT(workorder.wo_date,'%Y-%m-%d') as wo_date, workorder.wo_qty, contract.cust_name, 
+				contract.item_name, DATE_FORMAT(contract.out_date,'%Y-%m-%d') as out_date, COALESCE(unsto_progress,'미출고') as unsto_progress,
+				contract.item_num, DATE_FORMAT(unsto_date,'%Y-%m-%d') as unsto_date, emp_num, workorder.wo_emp
+		from unstore
+		right outer join workorder
+		on unstore.wo_num=workorder.wo_num
+		right outer join contract
+		on workorder.business_num = contract.business_num
+		where workorder.wo_available=1 and workorder.wo_num =#{wo_num}
+	
+	</select>
+	
+	<select id="getunstoreStatus" resultType="map">
+	    select workorder_item.wo_num, workorder_item.item_name, workorder_item.wo_qty, stock.stk_qnt,stock.item_num,                
+	    	   case 
+			   when stock.stk_qnt - workorder_item.wo_qty >= 0 then '출고가능'
+			   else '출고불가능'
+			   end as unstore_status
+        from workorder_item
+        left join stock on workorder_item.item_name = stock.item_name
+        where workorder_item.wo_num=#{wo_num};
+	
+	</select>
+
+</mapper>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itwillbs.mappers.boardMapper">
+	
+	<insert id="insertBoard">
+    	insert into board(bo_num,bo_emp_num,bo_name,bo_title,bo_content,bo_count,bo_date,file,top_fixed) 
+    	values(#{bo_num},#{bo_emp_num},#{bo_name},#{bo_title},#{bo_content},#{bo_count},#{bo_date},#{file},#{top_fixed})
+    </insert>
+    
+    <select id="getMaxBo_num" resultType="java.lang.Integer">
+        select max(bo_num) from board 
+    </select>
+	
+	<select id="getBoardCount" resultType="java.lang.Integer">
+        select count(*) from board
+	    <where>
+	        <if test="search_option == 'bo_name' and keyword != null">
+	            and bo_name like CONCAT('%', #{keyword}, '%')
+	        </if>
+	        <if test="search_option == 'bo_title' and keyword != null">
+	            and bo_title like CONCAT('%', #{keyword}, '%')
+	        </if>
+	        <if test="search_option == null and keyword == null">
+	            and bo_status = 1
+	        </if>
+	    </where>  
+	</select>
+	
+	<select id="getNoticeList" resultType="com.itwillbs.domain.BoardDTO">
+	    select row_number() over(order by case when top_fixed = 1 then 0 else bo_num end desc) as row_num, 
+	    		bo_num, bo_title, bo_name, bo_content, bo_count, bo_date, file, bo_status, top_fixed from board
+	    where 1=1
+	        <if test="search_option != null and keyword != null">
+	            <choose>
+	                <when test="search_option == 'bo_name'">
+	                    and bo_name like CONCAT('%', #{keyword}, '%')
+	                </when>
+	                <when test="search_option == 'bo_title'">
+	                    and bo_title like CONCAT('%', #{keyword}, '%')
+	                </when>
+	                <otherwise>
+	                    and bo_status = 1
+	                </otherwise>
+	            </choose>
+	        </if>
+	        <if test="search_option == null and keyword == null">
+	            and bo_status = 1
+	        </if>
+	    
+	    order by top_fixed desc, bo_num desc
+	    limit #{startRow}, #{pageSize}
+	</select>
+    
+    <select id="getBoard" resultType="com.itwillbs.domain.BoardDTO">
+        select * from board
+        where bo_num = #{bo_num}   	
+    </select>
+    
+    <update id="boCount" >
+        update board set bo_count = #{bo_count}+1
+        where bo_num = #{bo_num}   	
+    </update>
+    
+    <update id="deleteBoard">
+    	update board set bo_status = 0
+    	where bo_num = #{bo_num}
+    </update>
+    
+    <update id="updateBoard">
+    	update board set bo_title = #{bo_title}, bo_content = #{bo_content}, file = #{file}, top_fixed = #{top_fixed}
+    	where bo_num = #{bo_num}   
+    </update>
+    
+     <select id="getNoticeList2" resultType="com.itwillbs.domain.BoardDTO">
+SELECT *, ROW_NUMBER() OVER (ORDER BY top_fixed DESC, bo_num DESC) AS row_num
+FROM board
+WHERE bo_status = 1
+ORDER BY top_fixed DESC, bo_num DESC
+LIMIT #{pageSize} OFFSET #{offset} 
+    </select>
+	
+	<select id="getBoardByBoNum" parameterType="int" resultType="com.itwillbs.domain.BoardDTO">
+    SELECT * FROM board WHERE bo_num = #{bo_num}
+	</select>
+	
+</mapper>	

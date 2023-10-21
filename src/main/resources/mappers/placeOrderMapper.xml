@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itwillbs.mappers.placeOrderMapper">
+	<insert id="insertOrder">
+  		insert into placeorder (order_num, order_date, due_date, whs_num, emp_num,
+                          		item_num, item_name, order_qty, order_sum, order_vat)
+ 		 values 
+  			<foreach collection="dto" item="dto" separator=",">
+ 				 (concat('OR',DATE_FORMAT(DATE_ADD(NOW(), INTERVAL 9 HOUR), '%Y%m%d%H%i%s')),
+         		 #{order_date}, #{due_date}, #{whs_num}, #{emp_num},
+           		 #{dto.item_num}, #{dto.item_name}, #{dto.order_qty}, #{dto.order_sum}, #{dto.order_vat} )
+          </foreach>
+         
+	</insert>
+
+	<select id="getWarehouseList"
+		resultType="com.itwillbs.domain.WarehouseDTO">
+		select * from warehouse
+		where whs_name like '%식자재'
+	</select>
+
+	<select id="getStk_qnt"
+		resultType="com.itwillbs.domain.StockDTO">
+		select stk_qnt from stock
+		where item_num=#{item_num}
+	</select>
+
+	<select id="getItemListMap" resultType="map">
+		select products.item_num,
+		products.item_name, products.supplier, products.weight, stock.stk_qnt, products.supply_price
+		from products join stock
+		on products.item_num = stock.item_num
+		where products.item_num like 'I%'
+		limit #{startRow}, #{pageSize} 
+	</select>
+	
+	<select id="getItemListCount" resultType="java.lang.Integer">
+        select count(*) from placeorder
+	</select>
+	
+	<select id="getEmployeeList"
+		resultType="com.itwillbs.domain.EmployeeDTO">
+		select * from employee
+		where dept_num = 400
+	</select>
+
+	<!-- 검색 조건문 -->
+	<select id="getOrderList"
+		resultType="com.itwillbs.domain.PlaceOrderDTO">
+		select * from placeorder
+		where 1=1
+		<if test="order_num != null">
+			and order_num like CONCAT('%', #{order_num}, '%')
+		</if>
+		<if test="order_date != null">
+			and order_date = #{order_date}
+		</if>
+		<if test="due_date != null">
+			and due_date = #{due_date}
+		</if>
+		<if test="item_name != null">
+			and item_name like CONCAT('%', #{item_name}, '%')
+		</if>
+		order by order_num desc
+		limit #{startRow}, #{pageSize} 
+	</select>
+	
+	<select id="getOrderListCount" resultType="java.lang.Integer">
+        select count(*) from placeorder
+        where 1=1
+		<if test="order_num != null">
+			and order_num like CONCAT('%', #{order_num}, '%')
+		</if>
+		<if test="order_date != null">
+			and order_date = #{order_date}
+		</if>
+		<if test="due_date != null">
+			and due_date = #{due_date}
+		</if>
+		<if test="item_name != null">
+			and item_name like CONCAT('%', #{item_name}, '%')
+		</if> 
+		order by order_num desc
+        
+    </select>
+
+</mapper>

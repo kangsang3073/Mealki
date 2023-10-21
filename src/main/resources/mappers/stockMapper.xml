@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itwillbs.mappers.stockMapper">
+	<select id="getWarehouseList"
+		resultType="com.itwillbs.domain.WarehouseDTO">
+		select * from warehouse where whs_name like '%식자재'	
+	</select>
+
+	<select id="getItem_typeList"
+		resultType="com.itwillbs.domain.ItemDTO">
+		select distinct item_type from products where item_type like '%식자재'
+	</select>
+	
+	<!-- 검색 조건문 -->
+	<select id="getStockList"
+		resultType="com.itwillbs.domain.StockDTO">
+		select * from stock
+		where 1=1 and item_type like '%식자재'
+		 <if test="item_type!=null and !item_type.equals('')">
+			and item_type = #{item_type}
+		</if> 
+		 <if test="item_num!=null and !item_num.equals('')">
+			and item_num like CONCAT('%', #{item_num}, '%')
+		</if>
+		<if test="item_name!=null and !item_name.equals('')">
+			and item_name like CONCAT('%',  #{item_name}, '%')
+		</if>
+		<if test="whs_num!=null and !whs_num.equals('')">
+			and whs_num = #{whs_num}
+		</if>
+		 limit #{startRow}, #{pageSize} 
+	</select>
+	
+	<select id="getStockListCount"
+		resultType="java.lang.Integer">
+		select count(*) from stock
+		 where 1=1
+		 <if test="item_type!=null and !item_type.equals('')">
+			and item_type = #{item_type}
+		</if> 
+		 <if test="item_num!=null and !item_num.equals('')">
+			and item_num like CONCAT('%', #{item_num}, '%')
+		</if>
+		<if test="item_name!=null and !item_name.equals('')">
+			and item_name like CONCAT('%',  #{item_name}, '%')
+		</if>
+		<if test="whs_num!=null and !whs_num.equals('')">
+			and whs_num = #{whs_num}
+		</if>
+	</select>
+	
+	<update id="updateStock_qnt">
+		update stock set stk_qnt = #{stk_qnt}
+    	where item_num = #{item_num}
+	</update>
+	
+	<insert id="insertStock">
+  		<selectKey keyProperty="whs_num" resultType="String" order="BEFORE">
+   		 select whs_num from warehouse where whs_name = #{item_type}
+ 		 </selectKey>
+  		insert into stock (item_type, item_num, item_name, whs_num)
+ 		 values (#{item_type}, #{item_num}, #{item_name}, #{whs_num})
+	</insert>
+
+	<update id="updateStock">
+    <selectKey keyProperty="whs_num" resultType="String" order="BEFORE">
+        select whs_num from warehouse where whs_name = #{item_type}
+    </selectKey>
+    	update stock set item_type = #{item_type}, item_name = #{item_name}, whs_num = #{whs_num}
+    	where item_num = #{item_num}
+	</update>
+	<select id="selectItem" parameterType="java.util.Map" resultType="com.itwillbs.domain.StockDTO">
+   	 	select *
+    	from stock
+    	where item_num = #{itemNum}
+  	</select>
+
+	
+	<delete id="deleteStock">
+		delete from stock
+		where item_num = #{item_num}
+	</delete>
+	
+</mapper>

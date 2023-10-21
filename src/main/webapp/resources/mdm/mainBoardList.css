@@ -1,0 +1,10 @@
+@charset "UTF-8";
+
+.mainBoardList_div{
+	width: 100%;
+	text-align: center;
+}
+
+.bo-title-hover:hover {
+  text-decoration: underline;
+}

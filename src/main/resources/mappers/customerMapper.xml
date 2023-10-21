@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itwillbs.mappers.customerMapper">
+    
+    <select id="getCustomerCount" resultType="java.lang.Integer">
+        select count(*) from customer
+	    <where>
+	        <if test="search_option != null and keyword != null">
+	            <choose>
+	                <when test="search_option == 'cust_num'">
+	                    and cust_num like CONCAT('%', #{keyword}, '%')
+	                </when>
+	                <when test="search_option == 'cust_name'">
+	                    and cust_name like CONCAT('%', #{keyword}, '%')
+	                </when>
+			    <when test="search_option == 'cust_uptae'">
+	                    and cust_uptae like CONCAT('%', #{keyword}, '%')
+	                </when>
+	                <otherwise>
+	                    and cust_status = 1
+	                </otherwise>
+	            </choose>
+	        </if>
+	        <if test="search_option == null and keyword == null">
+	            and cust_status = 1
+	        </if>
+	    </where>
+        
+    </select>
+    
+    <select id="getCustomer" resultType="com.itwillbs.domain.CustomerDTO">
+        select * from customer
+        where business_num = #{business_num}   	
+    </select>
+    
+    
+    <select id="getCustomerList" resultType="com.itwillbs.domain.CustomerDTO">
+        select * from customer
+	    <where>
+	        <if test="search_option != null and keyword != null">
+	            <choose>
+	                <when test="search_option == 'cust_num'">
+	                    and cust_num like CONCAT('%', #{keyword}, '%')
+	                </when>
+	                <when test="search_option == 'cust_name'">
+	                    and cust_name like CONCAT('%', #{keyword}, '%')
+	                </when>
+			    <when test="search_option == 'cust_uptae'">
+	                    and cust_uptae like CONCAT('%', #{keyword}, '%')
+	                </when>
+	                <otherwise>
+	                    and cust_status = 1
+	                </otherwise>
+	            </choose>
+	        </if>
+	        <if test="search_option == null and keyword == null">
+	            and cust_status = 1
+	        </if>
+	    </where>
+        order by cust_num desc 
+        limit #{startRow} , #{pageSize}    	
+    </select>
+    
+    <insert id="insertCustomer">
+    	insert into customer(cust_num,cust_gubun2,cust_gubun1,business_num,cust_name,boss_name,cust_tel,cust_uptae,cust_jongmok,man_name,man_tel,man_email,fax,cust_post_num,cust_address,cust_address2,url_path,remarks) 
+    	values(concat('CS',DATE_FORMAT(DATE_ADD(NOW(), INTERVAL 9 HOUR), '%Y%m%d%H%i%s')), #{cust_gubun2},#{cust_gubun1},#{business_num},#{cust_name},#{boss_name},#{cust_tel},#{cust_uptae},#{cust_jongmok},#{man_name},#{man_tel},#{man_email},#{fax},#{cust_post_num},#{cust_address},#{cust_address2},#{url_path},#{remarks})
+    </insert>
+    
+    <update id="deleteCustomer">
+		update customer set cust_status = 0
+		where business_num = #{business_num}
+	</update>
+	
+	<update id="updateCustomer">
+		update customer set cust_gubun1 = #{cust_gubun1}, cust_gubun2 = #{cust_gubun2}, business_num = #{business_num},cust_name = #{cust_name},
+							boss_name = #{boss_name}, cust_tel = #{cust_tel}, cust_uptae = #{cust_uptae}, cust_jongmok = #{cust_jongmok}, man_name = #{man_name},
+							man_tel = #{man_tel}, man_email = #{man_email}, fax = #{fax}, cust_post_num = #{cust_post_num}, cust_address = #{cust_address}, cust_address2 = #{cust_address2}, url_path = #{url_path}, remarks = #{remarks}
+		where business_num = #{business_num}
+	</update>	
+
+</mapper>
