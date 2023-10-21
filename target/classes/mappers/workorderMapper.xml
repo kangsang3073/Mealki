@@ -209,7 +209,7 @@
 		on q.wo_num=w.wo_num
 		where r.r_name=w.item_name
 		and w.wo_num=#{num}
-		group by w.wo_num, c.business_num, r.item_num, c.item_num, r.item_name, c.contract_qty
+		group by w.wo_num, c.business_num, r.item_num, c.item_num, r.item_name, c.contract_qty, r.r_qty, p.weight
 	</select>
 
 	<insert id="insertWorkorder">

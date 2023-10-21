@@ -15,9 +15,9 @@
 <!-- 		<property name="url" value="jdbc:log4jdbc:mysql://itwillbs-rds-class1-team1.cwyqfeylunq5.ap-northeast-2.rds.amazonaws.com:3306/team1_milki"></property>
 		<property name="username" value="root"></property>
 		<property name="password" value="class11020"></property> -->
-		<property name="url" value="jdbc:mysql://localhost/itwillbs18?serverTimezone=UTC"></property>
-		<property name="username" value="itwillbs18"></property>
-		<property name="password" value="itwillbs8030909"></property>
+		<property name="url" value="jdbc:log4jdbc:mysql://172.16.2.11:3308/milki"></property>
+		<property name="username" value="milki"></property>
+		<property name="password" value="milki123"></property>
 	</bean>
 	
 		<!-- Mybatis 설정 객체생성 

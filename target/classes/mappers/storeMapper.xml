@@ -44,7 +44,8 @@
 		</if>
 		GROUP BY
 		    placeorder.order_num,
-		    placeorder.item_name
+		    placeorder.item_name,
+		    store.sto_num
 		ORDER BY
 		    sto_progress,
 		    sto_num DESC,
@@ -85,7 +86,8 @@
 		</if>
 		GROUP BY
 		    placeorder.order_num,
-		    placeorder.item_name)as subquery
+		    placeorder.item_name,
+		    store.sto_num)as subquery
         
 	</select>
 	
@@ -106,7 +108,8 @@
 		    LEFT JOIN stock ON products.item_num = stock.item_num
 		GROUP BY
 		    placeorder.order_num,
-		    placeorder.item_name
+		    placeorder.item_name,
+		    store.sto_num
 		ORDER BY
 		    sto_progress,
 		    sto_num DESC,
