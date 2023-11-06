@@ -61,12 +61,6 @@ $(document).ready(function(){
     			}
 			});
 		},
-    		  error:function(){
-    			  console.log("이달의수주왕 실패");
-    		  },
-    		  complete: function() {
-    			    console.log("이달의수주왕 완료");
-    			  }
 
     	  }); // ajax
 

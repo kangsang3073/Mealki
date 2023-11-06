@@ -45,7 +45,7 @@
 		on p.wo_num = u.wo_num  right join workorder w on u.wo_num = w.wo_num
 		left join linecode l on l.manu_name = w.manu_name left join qc_status q on w.wo_num = q. wo_num
 		where u.unsto_progress='출고완료' and w.wo_available = '1'
-		group by u.wo_num;
+		group by u.wo_num, l.manu_code, l.manu_name, u.item_name, u.item_num, u.unsto_qty, q.manu_fail;
     </select>
     
     <update id="insertProduct">
